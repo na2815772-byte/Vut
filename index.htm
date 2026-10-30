@@ -8,12 +8,13 @@
 <style>
 :root{
   --cyan:#8ff5ff;--line:rgba(164,239,255,.28);--panel:rgba(5,12,18,.82);--text:#effcff;
-  /* স্টিয়ারিং হুইলের মাপ ও অবস্থান (script.js এই ভ্যারিয়েবল পড়ে) */
   --wheel-size:clamp(104px,min(30vw,34svh),170px);
   --wheel-bottom:16px;
   --sc-size:clamp(70px,17vw,96px);
   --safe-b:env(safe-area-inset-bottom,0px);
   --safe-t:env(safe-area-inset-top,0px);
+  /* রাস্তার দাগ কত দ্রুত সরবে (ছোট = দ্রুত)। গতি অনুযায়ী নিচের স্ক্রিপ্ট এটি বদলায় */
+  --road-dur:.9s;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#030609;color:var(--text);font-family:system-ui,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -25,11 +26,15 @@ button{font:inherit;color:inherit;border:1px solid var(--line);background:var(--
 .road-scene{position:absolute;inset:27% 0 0;z-index:-1;overflow:hidden;pointer-events:none}
 .road{position:absolute;left:50%;bottom:-8%;width:min(78vw,850px);height:108%;transform:translateX(-50%);background:linear-gradient(90deg,#080c0e,#1a2023 48%,#171d20 52%,#080c0e);clip-path:polygon(43% 0,57% 0,100% 100%,0 100%);filter:drop-shadow(0 0 18px #000)}
 .road:before,.road:after{content:"";position:absolute;top:0;bottom:0;width:2px;background:#a9d5da44}.road:before{left:43%}.road:after{right:43%}
-.center-dashes{position:absolute;inset:0 auto 0 50%;width:5px;transform:translateX(-50%);background:repeating-linear-gradient(to bottom,#bbdddd99 0 5%,transparent 5% 12%);clip-path:polygon(48% 0,52% 0,100% 100%,0 100%);opacity:.3}
+/* চলমান মাঝের দাগ — গাড়ি চলার অনুভূতি */
+.center-dashes{position:absolute;inset:0 auto 0 50%;width:5px;transform:translateX(-50%);background:repeating-linear-gradient(to bottom,#bbdddd 0 60px,transparent 60px 120px);background-size:100% 240px;clip-path:polygon(48% 0,52% 0,100% 100%,0 100%);opacity:.38;animation:roadmove var(--road-dur) linear infinite}
+@keyframes roadmove{from{background-position:0 0}to{background-position:0 240px}}
 .road-glow{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 82%,#d0f4ff22,transparent 40%)}
 .headlight-beam{position:absolute;left:50%;bottom:0;width:min(83vw,900px);height:68%;transform:translateX(-50%);background:linear-gradient(to top,#d8f7ff30,#b3e0ee14 44%,transparent 95%);clip-path:polygon(45% 100%,55% 100%,84% 0,16% 0);mix-blend-mode:screen;transition:opacity .25s}
 .lamp{position:absolute;top:30%;height:31%;width:3px;background:#121c21;opacity:.8}.lamp:after{content:"";position:absolute;top:0;left:-15px;width:32px;height:32px;border-radius:50%;background:radial-gradient(circle,#e5f9ff 0 4%,#91e0ff6b 10%,transparent 72%);box-shadow:0 0 28px 12px #8adaff24}
 .lamp.left{left:9%}.lamp.right{right:9%}
+/* script.js অনেক ল্যাম্প বানালেও স্ক্রিনে সর্বোচ্চ ৪টি দেখাবে */
+.road-scene .lamp:nth-of-type(n+5){display:none!important}
 .ghost-shadow{position:absolute;top:34%;width:48px;height:78px;opacity:.35;background:radial-gradient(ellipse at 50% 28%,#dafaffb3,#9bd6e626 42%,transparent 72%);filter:blur(3px);animation:haunt 5.4s ease-in-out infinite}
 .ghost-shadow:before{content:"";position:absolute;inset:5px 12px 0;border-radius:50%;background:linear-gradient(#e2fcffa6,#b4e3ee0a);clip-path:polygon(50% 0,83% 15%,100% 55%,88% 100%,67% 80%,50% 100%,31% 80%,9% 100%,0 55%,17% 15%)}
 .ghost-shadow.one{left:13%}.ghost-shadow.two{right:17%;top:42%;animation-delay:-2.5s}
@@ -46,7 +51,6 @@ button{font:inherit;color:inherit;border:1px solid var(--line);background:var(--
 /* ---------- নিচের কন্ট্রোল ---------- */
 .controls{position:absolute;z-index:10;left:0;right:0;bottom:calc(var(--safe-b) + var(--wheel-bottom));display:flex;align-items:flex-end;justify-content:space-between;padding:0 16px;gap:10px;pointer-events:none}
 .control-cluster{display:flex;align-items:flex-end;gap:10px;pointer-events:auto}
-/* পেডাল দুটি ডানদিকে ওপর-নিচে সাজানো, যাতে মাঝখানের হুইলের জায়গা থাকে */
 .pedals{flex-direction:column;align-items:stretch}
 .control-btn{width:clamp(58px,14vw,78px);height:clamp(58px,14vw,78px);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:linear-gradient(145deg,#112731e8,#030a0ff0);box-shadow:inset 0 0 0 1px #c4f9ff0d,0 5px 22px #0005;backdrop-filter:blur(7px);touch-action:none}
 .control-btn .symbol{font-size:clamp(20px,5.6vw,29px);line-height:1}.control-btn .caption{font-size:9px;letter-spacing:.04em;color:#c2e8ee;white-space:nowrap}
@@ -54,8 +58,20 @@ button{font:inherit;color:inherit;border:1px solid var(--line);background:var(--
 .pedal{width:clamp(64px,15vw,86px);height:clamp(64px,15vw,86px);border-radius:18px}.pedal .symbol{font-size:clamp(22px,5.6vw,32px)}.pedal .caption{font-size:10px;font-weight:700}
 .brake{border-color:#ff78765a}.accelerate{border-color:#82f3ca52}
 
-/* স্টিয়ারিং হুইল (script.js ভেতরের SVG বানায়) */
-#steeringWheel{position:absolute;z-index:7}
+/* স্টিয়ারিং হুইল — গোল, নিচের মাঝখানে। ঘোরানো যাবে (টাচ/মাউস) */
+#steeringWheel{
+  position:absolute;z-index:11;
+  width:var(--wheel-size);height:var(--wheel-size);
+  left:calc(50% - var(--wheel-size) / 2);
+  bottom:calc(var(--safe-b) + var(--wheel-bottom));
+  border-radius:50%;
+  touch-action:none;cursor:grab;
+  pointer-events:auto;
+  display:flex;align-items:center;justify-content:center;
+  will-change:transform;
+}
+#steeringWheel:active{cursor:grabbing}
+#steeringWheel svg,#steeringWheel canvas,#steeringWheel img{width:100%;height:100%;display:block;border-radius:50%;pointer-events:none}
 
 /* শর্টকাট বোতাম: হুইলের ঠিক ওপরে */
 .shortcut-wheel{display:none;position:absolute;z-index:12;left:50%;bottom:calc(var(--safe-b) + var(--wheel-bottom) + var(--wheel-size) + 10px);transform:translateX(-50%);width:var(--sc-size);height:var(--sc-size);border-radius:50%;border:2px solid #97f5ffcc;background:radial-gradient(circle at 35% 28%,#27505f,#02090ef5 70%);box-shadow:0 0 25px #4de3ff3d,inset 0 0 15px #9df1ff24;pointer-events:auto;touch-action:none;align-items:center;justify-content:center;flex-direction:column;gap:2px;animation:pulse 1s ease-in-out infinite alternate}
@@ -64,7 +80,6 @@ button{font:inherit;color:inherit;border:1px solid var(--line);background:var(--
 
 .bottom-hint{position:absolute;z-index:4;bottom:calc(var(--safe-b) + var(--wheel-bottom) + var(--wheel-size) + var(--sc-size) + 20px);left:50%;transform:translateX(-50%);width:max-content;max-width:75%;text-align:center;font-size:10px;color:#c6e4ebb0;pointer-events:none;text-shadow:0 0 6px #000}
 
-/* ---------- script.js যে এলিমেন্ট যোগ করে, তাদের অবস্থান ঠিক করা ---------- */
 #levelHud{top:calc(max(10px,var(--safe-t)) + 4px)!important}
 #rearCam{top:calc(max(10px,var(--safe-t)) + 100px)!important}
 
@@ -84,7 +99,6 @@ button{font:inherit;color:inherit;border:1px solid var(--line);background:var(--
   .ghost-shadow{top:40%}.ghost-shadow.two{top:46%}
   .controls{padding-left:12px;padding-right:12px}
   .control-cluster{gap:7px}
-  /* ওপরের সারি: বাঁয়ে লেভেল HUD, ডানে রিয়ার ক্যাম — কার্ডের নিচে */
   #levelHud{top:calc(max(10px,var(--safe-t)) + 96px)!important;left:12px!important;transform:none!important;text-align:left!important;min-width:0!important;width:calc(100% - min(36vw,170px) - 34px)}
   #rearCam{top:calc(max(10px,var(--safe-t)) + 96px)!important}
   .notice{top:calc(max(10px,var(--safe-t)) + 182px)}
@@ -110,7 +124,7 @@ button{font:inherit;color:inherit;border:1px solid var(--line);background:var(--
     </section>
     <section class="hud-card status">
       <div><span class="dot"></span><span id="gameStatus">NIGHT DRIVE</span></div>
-      <div class="stat">SPEED <strong><span id="speedValue">0</span> / 300</strong></div>
+      <div class="stat">SPEED <strong><span id="speedValue">100</span> / 500</strong></div>
     </section>
   </header>
 
@@ -130,7 +144,6 @@ button{font:inherit;color:inherit;border:1px solid var(--line);background:var(--
     </div>
   </nav>
 
-  <!-- শুরুতে লুকানো। শর্টকাট কাছাকাছি এলে game JS এটি দেখায় -->
   <button class="shortcut-wheel" id="shortcutSteering" type="button" aria-label="Turn into shortcut"><span class="wheel-icon">◉</span><span class="wheel-label">SHORTCUT ↗</span></button>
 
   <section class="overlay" id="startOverlay" aria-label="Game start screen">
@@ -143,6 +156,129 @@ button{font:inherit;color:inherit;border:1px solid var(--line);background:var(--
     </div>
   </section>
 </main>
+
+<!-- ============ ভুতুড়ে সাউন্ড + রাস্তার গতি (HTML-এর নিজস্ব) ============ -->
+<script>
+(function(){
+  /* script.js-এ নিজের সাউন্ড থাকলে এই লাইন দিয়ে বন্ধ করতে পারো: window.GK_DISABLE_HTML_AUDIO = true; */
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var ctx = null, master = null, started = false, lastType = -1, timer = null;
+
+  /* ---- রাস্তার দাগের গতি, speedValue দেখে ---- */
+  var sp = document.getElementById('speedValue');
+  function updateRoad(){
+    var v = parseFloat(sp && sp.textContent) || 100;
+    v = Math.max(20, Math.min(500, v));
+    document.documentElement.style.setProperty('--road-dur', (90 / v).toFixed(3) + 's');
+  }
+  if (sp && window.MutationObserver) {
+    new MutationObserver(updateRoad).observe(sp, {childList:true, characterData:true, subtree:true});
+  }
+  updateRoad();
+
+  /* ---- সাউন্ড ---- */
+  function noiseBuf(sec){
+    var b = ctx.createBuffer(1, ctx.sampleRate * sec, ctx.sampleRate), d = b.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return b;
+  }
+  function pan(node, p){
+    if (ctx.createStereoPanner) { var s = ctx.createStereoPanner(); s.pan.value = p; node.connect(s); s.connect(master); }
+    else node.connect(master);
+  }
+  function env(g, t, a, peak, d){
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
+  }
+
+  function ambient(){
+    /* গভীর ড্রোন */
+    [55, 58.3, 82.4].forEach(function(f, i){
+      var o = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+      o.type = i === 2 ? 'sine' : 'sawtooth'; o.frequency.value = f;
+      lp.type = 'lowpass'; lp.frequency.value = 180;
+      g.gain.value = i === 2 ? 0.05 : 0.035;
+      var lfo = ctx.createOscillator(), lg = ctx.createGain();
+      lfo.frequency.value = 0.07 + i * 0.04; lg.gain.value = g.gain.value * 0.6;
+      lfo.connect(lg); lg.connect(g.gain); lfo.start();
+      o.connect(lp); lp.connect(g); g.connect(master); o.start();
+    });
+    /* বাতাসের শব্দ */
+    var n = ctx.createBufferSource(); n.buffer = noiseBuf(4); n.loop = true;
+    var bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 500; bp.Q.value = 0.8;
+    var ng = ctx.createGain(); ng.gain.value = 0.07;
+    var l2 = ctx.createOscillator(), l2g = ctx.createGain();
+    l2.frequency.value = 0.12; l2g.gain.value = 250; l2.connect(l2g); l2g.connect(bp.frequency); l2.start();
+    n.connect(bp); bp.connect(ng); ng.connect(master); n.start();
+  }
+
+  var sounds = [
+    function moan(t, p){
+      var o = ctx.createOscillator(), g = ctx.createGain(), v = ctx.createOscillator(), vg = ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(320, t); o.frequency.exponentialRampToValueAtTime(130, t + 2.6);
+      v.frequency.value = 5; vg.gain.value = 12; v.connect(vg); vg.connect(o.frequency);
+      env(g, t, 0.5, 0.22, 2.4); o.connect(g); pan(g, p); o.start(t); v.start(t); o.stop(t + 3.2); v.stop(t + 3.2);
+    },
+    function whisper(t, p){
+      var n = ctx.createBufferSource(); n.buffer = noiseBuf(3);
+      var bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2600; bp.Q.value = 3;
+      var g = ctx.createGain(); env(g, t, 0.7, 0.25, 1.8);
+      n.connect(bp); bp.connect(g); pan(g, p); n.start(t); n.stop(t + 3);
+    },
+    function wail(t, p){
+      var o = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+      o.type = 'triangle'; o.frequency.setValueAtTime(380, t);
+      o.frequency.exponentialRampToValueAtTime(950, t + 1.2); o.frequency.exponentialRampToValueAtTime(260, t + 2.8);
+      lp.type = 'lowpass'; lp.frequency.value = 1800;
+      env(g, t, 0.9, 0.16, 2.1); o.connect(lp); lp.connect(g); pan(g, p); o.start(t); o.stop(t + 3.2);
+    },
+    function laugh(t, p){
+      for (var i = 0; i < 6; i++) {
+        var o = ctx.createOscillator(), g = ctx.createGain(), s = t + i * 0.19;
+        o.type = 'square'; o.frequency.setValueAtTime(420 - i * 28, s);
+        o.frequency.exponentialRampToValueAtTime(300 - i * 20, s + 0.14);
+        var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+        env(g, s, 0.02, 0.09, 0.13); o.connect(lp); lp.connect(g); pan(g, p); o.start(s); o.stop(s + 0.2);
+      }
+    },
+    function knock(t, p){
+      for (var i = 0; i < 3; i++) {
+        var o = ctx.createOscillator(), g = ctx.createGain(), s = t + i * 0.28;
+        o.type = 'sine'; o.frequency.setValueAtTime(110, s); o.frequency.exponentialRampToValueAtTime(45, s + 0.15);
+        env(g, s, 0.005, 0.5, 0.2); o.connect(g); pan(g, p); o.start(s); o.stop(s + 0.3);
+      }
+    }
+  ];
+
+  function nextGhost(){
+    var i; do { i = Math.floor(Math.random() * sounds.length); } while (i === lastType);
+    lastType = i;
+    try { sounds[i](ctx.currentTime + 0.05, Math.random() * 1.6 - 0.8); } catch(e){}
+    timer = setTimeout(nextGhost, 5000 + Math.random() * 9000);
+  }
+
+  function startAudio(){
+    if (window.GK_DISABLE_HTML_AUDIO || started || !AC) return;
+    try {
+      ctx = new AC();
+      if (ctx.state === 'suspended') ctx.resume();
+      master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+      started = true;
+      ambient();
+      timer = setTimeout(nextGhost, 2500);
+    } catch(e){ console.warn('audio failed', e); }
+  }
+
+  var btn = document.getElementById('startButton');
+  if (btn) btn.addEventListener('click', startAudio, true);
+  /* ট্যাব লুকালে সাউন্ড থামে, ফিরলে চলে */
+  document.addEventListener('visibilitychange', function(){
+    if (!ctx) return;
+    if (document.hidden) ctx.suspend(); else ctx.resume();
+  });
+})();
+</script>
 <script src="script.js" defer></script>
 </body>
 </html>
