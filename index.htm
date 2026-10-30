@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#05080c">
+<title>Ghost Kingdom</title>
+<style>
+:root{--cyan:#8ff5ff;--line:rgba(164,239,255,.28);--panel:rgba(5,12,18,.82);--text:#effcff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#030609;color:var(--text);font-family:system-ui,sans-serif;touch-action:none;user-select:none}
+button{font:inherit;color:inherit;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+#game{position:relative;width:100%;height:100%;min-height:100svh;overflow:hidden;isolation:isolate;background:radial-gradient(ellipse at 50% 60%,#14242a 0%,transparent 45%),linear-gradient(#070d15,#0b1319 45%,#020406)}
+.mist{position:absolute;inset:15% -20% 24%;z-index:-1;opacity:.45;background:radial-gradient(ellipse,rgba(139,200,207,.17),transparent 68%);filter:blur(17px);animation:drift 13s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translateX(4%) scale(1.13)}}
+.tree-line{position:absolute;left:0;right:0;top:19%;height:35%;z-index:-1;opacity:.8;background:linear-gradient(145deg,transparent 40%,#030608 41% 48%,transparent 49%) 0 0/150px 100% repeat-x;clip-path:polygon(0 28%,5% 45%,10% 8%,16% 42%,22% 0,28% 38%,35% 15%,43% 50%,50% 5%,58% 41%,66% 12%,74% 49%,82% 3%,90% 40%,96% 18%,100% 32%,100% 100%,0 100%)}
+.road-scene{position:absolute;inset:27% 0 0;z-index:-1;overflow:hidden;pointer-events:none}
+.road{position:absolute;left:50%;bottom:-8%;width:min(78vw,850px);height:108%;transform:translateX(-50%);background:linear-gradient(90deg,#080c0e,#1a2023 48%,#171d20 52%,#080c0e);clip-path:polygon(43% 0,57% 0,100% 100%,0 100%);filter:drop-shadow(0 0 18px #000)}
+.road:before,.road:after{content:"";position:absolute;top:0;bottom:0;width:2px;background:#a9d5da44}.road:before{left:43%}.road:after{right:43%}
+.center-dashes{position:absolute;inset:0 auto 0 50%;width:5px;transform:translateX(-50%);background:repeating-linear-gradient(to bottom,#bbdddd99 0 5%,transparent 5% 12%);clip-path:polygon(48% 0,52% 0,100% 100%,0 100%);opacity:.3}
+.road-glow{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 82%,#d0f4ff22,transparent 40%)}
+.headlight-beam{position:absolute;left:50%;bottom:0;width:min(83vw,900px);height:68%;transform:translateX(-50%);background:linear-gradient(to top,#d8f7ff30,#b3e0ee14 44%,transparent 95%);clip-path:polygon(45% 100%,55% 100%,84% 0,16% 0);mix-blend-mode:screen}
+.lamp{position:absolute;top:30%;height:31%;width:3px;background:#121c21;opacity:.8}.lamp:after{content:"";position:absolute;top:0;left:-15px;width:32px;height:32px;border-radius:50%;background:radial-gradient(circle,#e5f9ff 0 4%,#91e0ff6b 10%,transparent 72%);box-shadow:0 0 28px 12px #8adaff24}
+.lamp.left{left:9%}.lamp.right{right:9%}
+.ghost-shadow{position:absolute;top:34%;width:48px;height:78px;opacity:.35;background:radial-gradient(ellipse at 50% 28%,#dafaffb3,#9bd6e626 42%,transparent 72%);filter:blur(3px);animation:haunt 5.4s ease-in-out infinite}
+.ghost-shadow:before{content:"";position:absolute;inset:5px 12px 0;border-radius:50%;background:linear-gradient(#e2fcffa6,#b4e3ee0a);clip-path:polygon(50% 0,83% 15%,100% 55%,88% 100%,67% 80%,50% 100%,31% 80%,9% 100%,0 55%,17% 15%)}
+.ghost-shadow.one{left:13%}.ghost-shadow.two{right:17%;top:42%;animation-delay:-2.5s}
+@keyframes haunt{0%,100%{transform:translateY(0);opacity:.16}50%{transform:translateY(-9px);opacity:.5}}
+.hud{position:absolute;z-index:5;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));display:flex;align-items:flex-start;justify-content:space-between;gap:10px;pointer-events:none}
+.hud-card{padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:#03090eb0;box-shadow:0 0 18px #41c1d60c;backdrop-filter:blur(8px)}
+.brand{font-size:clamp(12px,2.6vw,18px);font-weight:900;letter-spacing:.13em;color:#dcfbff;text-shadow:0 0 13px #59ebff73}
+.stat{font-size:clamp(10px,2.4vw,14px);color:#a3c3cb;margin-top:4px}.stat strong{color:white;font-variant-numeric:tabular-nums}
+.status{text-align:right;font-size:11px;color:#c3e6ea;letter-spacing:.08em}.dot{display:inline-block;width:7px;height:7px;background:#87f4c0;border-radius:50%;margin-right:5px;box-shadow:0 0 10px #70ffc3}
+.notice{position:absolute;z-index:6;top:20%;left:50%;transform:translateX(-50%);width:max-content;max-width:84%;padding:8px 13px;border:1px solid #bcecf633;border-radius:999px;background:#02070b85;font-size:clamp(10px,2.7vw,13px);color:#cceaf0;text-align:center;pointer-events:none}
+.controls{position:absolute;z-index:10;left:0;right:0;bottom:max(16px,env(safe-area-inset-bottom));display:flex;align-items:flex-end;justify-content:space-between;padding:0 16px;gap:10px;pointer-events:none}
+.control-cluster{display:flex;align-items:flex-end;gap:10px;pointer-events:auto}
+.control-btn{width:clamp(58px,14vw,78px);height:clamp(58px,14vw,78px);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:linear-gradient(145deg,#112731e8,#030a0ff0);box-shadow:inset 0 0 0 1px #c4f9ff0d,0 5px 22px #0005;backdrop-filter:blur(7px);touch-action:none}
+.control-btn .symbol{font-size:clamp(20px,5.6vw,29px);line-height:1}.control-btn .caption{font-size:9px;letter-spacing:.04em;color:#c2e8ee;white-space:nowrap}
+.control-btn:active,.control-btn[aria-pressed=true]{border-color:#8ff5ffdb;box-shadow:0 0 22px #59ebff73,inset 0 0 14px #63e7ff29}
+.pedal{width:clamp(64px,15vw,86px);height:clamp(76px,18vw,100px);border-radius:18px}.pedal .symbol{font-size:clamp(24px,6vw,34px)}.pedal .caption{font-size:10px;font-weight:700}
+.brake{border-color:#ff78765a}.accelerate{border-color:#82f3ca52}
+.shortcut-wheel{display:none;position:absolute;z-index:12;left:50%;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 106px);transform:translateX(-50%);width:clamp(76px,19vw,108px);height:clamp(76px,19vw,108px);border-radius:50%;border:2px solid #97f5ffcc;background:radial-gradient(circle at 35% 28%,#27505f,#02090ef5 70%);box-shadow:0 0 25px #4de3ff3d,inset 0 0 15px #9df1ff24;pointer-events:auto;touch-action:none;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.shortcut-wheel .wheel-icon{font-size:36px;line-height:1}.shortcut-wheel .wheel-label{font-size:9px;color:#d8fbff;font-weight:800;letter-spacing:.08em}.shortcut-wheel.is-visible{display:flex}
+.bottom-hint{position:absolute;z-index:4;bottom:calc(max(16px,env(safe-area-inset-bottom)) + 112px);left:50%;transform:translateX(-50%);width:max-content;max-width:75%;text-align:center;font-size:10px;color:#c6e4eb8c;pointer-events:none}
+.overlay{position:absolute;z-index:20;inset:0;display:flex;align-items:center;justify-content:center;padding:22px;background:#010408b8;backdrop-filter:blur(9px)}
+.overlay-card{width:min(460px,100%);padding:clamp(22px,5vw,34px);border:1px solid #99e8f64d;border-radius:22px;background:linear-gradient(145deg,#0c1a22f7,#03080dfc);text-align:center;box-shadow:0 0 50px #39c2dc1a}
+.eyebrow{color:#8fefff;font-size:11px;letter-spacing:.24em;font-weight:800}h1{font-size:clamp(29px,8vw,48px);line-height:1;margin:12px 0;color:#e7fcff;text-shadow:0 0 24px #68e4ff43}
+.intro{font-size:13px;line-height:1.7;color:#b3cdd3;margin:0 auto 20px;max-width:340px}
+.start-btn{min-height:48px;padding:0 26px;border-radius:999px;border-color:#91f7ffb3;background:linear-gradient(100deg,#b4faff,#53cbdc);color:#031016;font-weight:900;letter-spacing:.08em;box-shadow:0 0 24px #57def233}
+.disclaimer{margin-top:14px;font-size:10px;color:#79939a;line-height:1.5}
+@media(orientation:portrait){.notice{top:18%}.road-scene{inset:30% 0 0}.tree-line{top:20%;height:30%}.lamp{top:37%;height:27%}.ghost-shadow{top:40%}.ghost-shadow.two{top:46%}.controls{padding-left:12px;padding-right:12px}.control-cluster{gap:7px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main id="game" aria-label="Ghost Kingdom driving game">
+  <div class="mist"></div><div class="tree-line"></div>
+  <div class="road-scene" aria-hidden="true">
+    <div class="road"><div class="center-dashes"></div></div><div class="road-glow"></div>
+    <div class="headlight-beam" id="headlightBeam"></div>
+    <div class="lamp left"></div><div class="lamp right"></div>
+    <div class="ghost-shadow one"></div><div class="ghost-shadow two"></div>
+  </div>
+  <header class="hud">
+    <section class="hud-card"><div class="brand">👻 GHOST KINGDOM</div><div class="stat">DISTANCE <strong id="distanceValue">0.0 KM</strong></div><div class="stat">SCORE <strong id="scoreValue">0</strong></div></section>
+    <section class="hud-card status"><div><span class="dot"></span><span id="gameStatus">NIGHT DRIVE</span></div><div class="stat">LEVEL <strong id="levelValue">01</strong></div><div class="stat">SPEED <strong><span id="speedValue">0</span> / 300</strong></div></section>
+  </header>
+  <div class="notice" id="roadMessage" aria-live="polite">অন্ধকার রাস্তা • হেডলাইট জ্বালান</div>
+  <div class="bottom-hint" id="shortcutHint">রাস্তার দিকে নজর রাখুন…</div>
+  <nav class="controls" aria-label="Driving controls">
+    <div class="control-cluster"><button class="control-btn headlight" id="headlightButton" type="button" aria-pressed="true" aria-label="Headlight on or off"><span class="symbol">☼</span><span class="caption">LIGHT ON</span></button></div>
+    <div class="control-cluster">
+      <button class="control-btn pedal brake" id="brakeButton" type="button" aria-label="Hold to brake"><span class="symbol">▰</span><span class="caption">BRAKE</span></button>
+      <button class="control-btn pedal accelerate" id="accelerateButton" type="button" aria-label="Hold to accelerate"><span class="symbol">⌁</span><span class="caption">SPEED</span></button>
+    </div>
+  </nav>
+  <!-- Hidden initially. Game JS reveals only while a shortcut is reachable and hides/deactivates on entry or when missed. -->
+  <button class="shortcut-wheel" id="shortcutSteering" type="button" aria-label="Turn into shortcut"><span class="wheel-icon">◉</span><span class="wheel-label">SHORTCUT ↗</span></button>
+  <section class="overlay" id="startOverlay" aria-label="Game start screen">
+    <div class="overlay-card"><div class="eyebrow">A HAUNTED ROAD EXPERIENCE</div><h1>GHOST<br>KINGDOM</h1>
+      <p class="intro">অন্ধকার পথে এগিয়ে যান। ধ্বংসাবশেষ এড়িয়ে চলুন, গোপন শর্টকাট খুঁজুন, আর পেছনের তিন ভূতের গাড়ি থেকে সাবধান থাকুন।</p>
+      <button class="start-btn" id="startButton" type="button">START DRIVE</button>
+      <p class="disclaimer">কন্ট্রোলের দৃশ্যমান কাঠামো প্রস্তুত। ফোন কাত করে চালানো ও গেমের নিয়ম JavaScript-এ যুক্ত করতে হবে।</p>
+    </div>
+  </section>
+</main>
+<!-- Game logic -->
+<script src="script.js" defer></script>
+</body>
+</html>
